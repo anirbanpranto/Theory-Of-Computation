@@ -1,0 +1,1 @@
+document.getElementById("random").innerHTML = "RG -> NFA"
