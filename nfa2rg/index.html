@@ -1,4 +1,30 @@
 <!DOCTYPE html>
+
+<style>
+    /* ---------------End of Products ---------------- */
+    .nfa-rg-left {
+        background-color: antiquewhite;
+        padding: 1.5rem;
+    }
+    table, th, td {
+    border-collapse: collapse;
+    border: 1px solid black;
+    padding: 1rem;
+    text-align: center;
+    }
+  
+    #td1{
+        background-color: #ffff00;
+    }
+
+    #td2{
+        background-color: #cccccc;
+    }
+
+</style>
+
+
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -7,6 +33,55 @@
 </head>
 <body>
    <h1 id="random"></h1> 
+
+<!--[Convert NFA (transition table) into Regular grammars]-->
+    <div class="nfa-rg-left">
+        <p><strong>NFA (Input)</strong></p>
+        <div>*Separate the variables using comma (,)</div>
+        <div>
+            <table class="input-table-nfa">
+                <tr>
+                    <td id=td1>Σ</td>
+                    <td id="td2">
+                        <textarea id="string-variables" rows="1"></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td id=td1>Q</td>
+                    <td id="td2">
+                        <textarea id="string-states" rows="1"></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td id=td1>START</td>
+                    <td id="td2">
+                        <textarea id="string-start-state" rows="1"></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td id="td1">FINAL</td>
+                    <td id="td2">
+                        <textarea id="string-final-states" rows="1"></textarea>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <br>
+        <button onclick="insertEpsilonVariable()">Insert &epsilon;</button>
+        <button onclick="generateTable()">Generate Transition Table</button>
+        <p><strong>Transition Table</strong></p>
+        <div class="nfa-table">
+            <table id="transition-table-nfa"></table>
+        </div>
+        <button onclick="convertNFAtoRG()">Convert NFA to RG</button>
+    </div>
+
+
+<!--[Testing strings]-->
+<!--[Draw the NFA]-->
+
+
+
 </body>
 <script src="index.js"></script>
 </html>
