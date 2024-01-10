@@ -12,6 +12,14 @@
     padding: 1rem;
     text-align: center;
     }
+
+    .nfa-table {
+    width: 300px;
+    height: 300px;
+    border: solid 1px black;
+    padding: 5px;
+}
+
   
     #td1{
         background-color: #ffff00;
@@ -21,6 +29,18 @@
         background-color: #cccccc;
     }
 
+    /* --------- new for NFA-to-RG ---------- */
+    .nfa-rg-left {
+        width: 30%;
+        float: left;
+        position: relative;
+    }
+
+    .nfa-rg-right {
+        width: 60%;
+        float: right;
+        position: relative;
+    }
 </style>
 
 
@@ -76,8 +96,23 @@
         <button onclick="convertNFAtoRG()">Convert NFA to RG</button>
     </div>
 
-
 <!--[Testing strings]-->
+    <div class="nfa-rg-right">
+        <p><strong>Regular Grammar</strong></p>
+        <div class="nfa-table">
+            <table id="rg-table"></table>
+        </div>
+        <p><strong>Check Strings (Input)</strong></p>
+        <div>
+            <textarea id="string-to-check" rows="10" spellcheck="false"></textarea>
+            <textarea id="string-check-result" rows="10" cols="5" spellcheck="false"></textarea>
+        </div>
+        <button onclick="insertEpsilonVariableAtCheckString()">Insert &epsilon;</button>
+        <button onclick="getStringToCheck()">Check String</button>
+    </div>
+
+
+
 <!--[Draw the NFA]-->
 
 
