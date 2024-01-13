@@ -6,7 +6,23 @@
     <title>Regular Grammer to NFA</title>
 </head>
 <body>
-   <h1 id="random"></h1> 
+    <textarea id="inputString" name="Input" rows="4" cols="50"></textarea>
+    <!-- <textarea type="text" id="inputString"></textarea> -->
+    <button onclick="parseParagraph(document.getElementById('inputString').value)">Parse</button>
+    
+    <textarea id="checkStringInput" name="strInput" rows="4" cols="50"></textarea>
+    <button onclick="document.getElementById('1').value = checkStringDfa(document.getElementById('checkStringInput').value)">Check</button>
+    <h1 id="random"></h1> 
+   <p id="1"></p>
+   <p id="2"></p>
+   <p id="3"></p>
+   <p id="4"></p>
 </body>
 <script src="index.js"></script>
+<!-- <script>parseParagraph("A - aB | bD\nB - aB | bB | b\nD - aD | bD | a")</script> -->
+<!-- <script>parseParagraph("S - bS | aA \n A -  bA | aB \n B - aB | bB | c")</script> -->
+<!-- <script>parseParagraph("A - 1B|0C \n  C - 1A | B \n B - ε")</script> -->
+<!-- <script>parseParagraph("S - 1A | 1S | 0S \n A-ε")</script> -->
+<!-- <script>parseParagraph("S - aS | bA | bS \n A - aS | bB \n B - ε")</script> -->
+<!-- <script>print()</script> -->
 </html>
