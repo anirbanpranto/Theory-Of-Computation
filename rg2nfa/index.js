@@ -6,12 +6,7 @@ const dfaTransitionTable = new Map();
 const FINAL_STATE_STRING = "FINAL";
 const STARTING_STATE_CHAR = 'A';
 
-function init() {
-    // FINAL_STATE.isFinalState = true;
-}
-
 function parseParagraph(paragraph) {
-    // init();
     var sentences = paragraph.trim().split("\n");
     sentences.forEach(sentence => parseText(sentence));
     console.log(sentences);
@@ -24,15 +19,8 @@ function parseParagraph(paragraph) {
     createExtraStates();
     createDfa();
     removeUnusedState();
+    renameDfaStateName();
     print();
-    // console.log("Check ----------");
-    // console.log(checkStringDfa("aababb"));
-    // console.log("NFA ----------");
-    // console.log(nfaWithoutEpsilon);
-    // console.log(getCombinations(['a','b','c']));
-    // console.log("check = " + checkString("abbbbbaba"));
-    // console.log(nfaTransitionTable.get("C"));
-    // console.log(getStatesKey("1","C"));
 }
 
 function parseText(sentence) {
@@ -53,7 +41,7 @@ function parseText(sentence) {
             if (state.hasMapping(firstChar)) {
                 state.getMapping(firstChar).push(stateName);
             } else {
-                state.addMapping(firstChar, new Array(stateName));
+                state.addMapping(firstChar, [stateName]);
             }
             variableSet.add(firstChar);
         } else if (a.length == 1) {
@@ -75,20 +63,17 @@ function parseText(sentence) {
                     finalState.isFinalState = true;
                     nfaTransitionTable.set(FINAL_STATE_STRING, finalState);
                 }
-                state.addMapping(firstChar, new Array(FINAL_STATE_STRING));
+                // Create or update mapping based on transition variable.
+                if (state.hasMapping(firstChar)) {
+                    state.getMapping(firstChar).push(FINAL_STATE_STRING);
+                } else {
+                    state.addMapping(firstChar, [FINAL_STATE_STRING]);
+                }
             }
         }
     });
 
-    console.log("--------");
-    console.log(state);
-
     setAllEmptyMapping();
-
-    document.getElementById("1").innerHTML = state.getMapping("1");
-    document.getElementById("2").innerHTML = variableSet;
-    document.getElementById("3").innerHTML = myArray[0];
-    document.getElementById("4").innerHTML = transitionText;
 }
 
 function setAllEmptyMapping() {
@@ -105,12 +90,10 @@ function isNFA() {
     for (let [key, state] of nfaTransitionTable.entries()) {
         const epsilonArr = state.getMapping("ε");
         if (epsilonArr.length > 1) {
-            console.log("le >1");
             return true;
         }
 
         if (epsilonArr[0] != "∅") {
-            console.log("not null")
             return true;
         }
 
@@ -125,7 +108,6 @@ function isNFA() {
 
 function print() {
     console.log(variableSet);
-    // console.log(nfaTransitionTable);
     console.log(nfaWithoutEpsilon);
     console.log("Temp NFA");
     console.log(tempNfa);
@@ -135,14 +117,15 @@ function print() {
     console.log(nfaTransitionTable);
     console.log("NFA without eps");
     console.log(nfaWithoutEpsilon);
-    // console.log("RE");
-    // console.log(removeUnusedState());
 }
 
 function checkStringDfa(str) {
     const initialState = Array.from(dfaTransitionTable.entries()).find(state => state[1].isInitialState);
     let result = traverse(0, str, initialState[0])
     console.log("Result : " + result)
+
+    document.getElementById("1").innerHTML = result;
+
     return result;
 
     // var currentState = castToState(getFirstState());
@@ -302,10 +285,11 @@ function createDfa() {
 
     let i = 0;
     for (const key of keys) {
-        dict.set(String.fromCharCode(STARTING_STATE_CHAR.charCodeAt(0) + i), key.split(","));
+        // dict.set(String.fromCharCode(STARTING_STATE_CHAR.charCodeAt(0) + i), key.split(","));
+        dict.set(i, key.split(","));
         i++;
     }
-    dict.set("FILLER", ["∅"]);
+    dict.set(999999999, ["∅"]);
     // console.log(dict);
 
     // Map it
@@ -321,6 +305,8 @@ function createDfa() {
         newState.isInitialState = nfaState.isInitialState;
         dfaTransitionTable.set(key, newState);
     }
+
+    console.log(dict);
 }
 
 function removeUnusedState() {
@@ -341,6 +327,34 @@ function removeUnusedState() {
 
     if (deleted) {
         removeUnusedState();
+    }
+}
+
+function renameDfaStateName() {
+    let index = 0;
+    const tempMapping = new Map();
+    const tempDfa = new Map();
+
+    // Get temporary mapping of the current DFA.
+    for (const [key, value] of dfaTransitionTable) {
+        const newKey = String.fromCharCode(STARTING_STATE_CHAR.charCodeAt(0) + index);
+        tempMapping.set(key, newKey);
+        index++;
+    }
+
+    // Rename all the states name based on the temporary mapping.
+    for (const [key, state] of dfaTransitionTable) {
+        for (const [transitionVar, stateMappingValue] of state.mapping.entries()) {
+            state.mapping.set(transitionVar, tempMapping.get(stateMappingValue));
+        }
+        tempDfa.set(tempMapping.get(key), state);
+        index++;
+    }
+
+    // Copy tempDfa to dfaTransitionTable.
+    dfaTransitionTable.clear();
+    for (const [key, value] of tempDfa) {
+        dfaTransitionTable.set(key, value);
     }
 }
 
