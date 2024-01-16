@@ -1,122 +1,136 @@
 <!DOCTYPE html>
 
 <style>
-    /* ---------------End of Products ---------------- */
-    .nfa-rg-left {
-        background-color: antiquewhite;
-        padding: 1.5rem;
-    }
-    table, th, td {
+    
+    th, td {
     border-collapse: collapse;
     border: 1px solid black;
+    margin: 1rem;
     padding: 1rem;
     text-align: center;
     }
-
+    
     .nfa-table {
-    width: 300px;
-    height: 300px;
+    width: auto;
+    height: 250px;
     border: solid 1px black;
-    padding: 5px;
-}
-
-  
+    padding: 1rem;
+    margin: 1rem;
+    margin-right: 5rem;
+    }
+    
     #td1{
         background-color: #ffff00;
+        padding: 1rem;
     }
 
     #td2{
         background-color: #cccccc;
+        padding: 1rem;
     }
 
-    /* --------- new for NFA-to-RG ---------- */
-    .nfa-rg-left {
-        width: 30%;
-        float: left;
-        position: relative;
+    #transition-table-nfa td, #transition-table-nfa tr {
+    padding: 10px; /* Adjust the value as needed */
     }
 
-    .nfa-rg-right {
-        width: 60%;
-        float: right;
-        position: relative;
+    #nfaCanvas{
+        height: auto;
+        width: auto;
     }
+
 </style>
-
-
 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NFA to Regular Grammer</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
 </head>
 <body>
-   <h1 id="random"></h1> 
+   
+<div class="container-fluid">
+    <div class="row">
+    <!--[Convert NFA (transition table) into Regular grammars]-->
+        <div class="col-md-4" style="margin-top: 1rem;">
+                <div class=""></div>
+                <p><strong>NFA (Input)</strong></p>
+                <div>*Separate the variables using comma (,)</div>
+                <div>*No need to enter the space bar</div>
+                <div>
+                    <table class="input-table-nfa">
+                        <tr>
+                            <td id=td1>Σ</td>
+                            <td id="td2">
+                                <textarea id="string-variables" rows="1"></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td id=td1>Q</td>
+                            <td id="td2">
+                                <textarea id="string-states" rows="1"></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td id=td1>START</td>
+                            <td id="td2">
+                                <textarea id="string-start-state" rows="1"></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td id="td1">FINAL</td>
+                            <td id="td2">
+                                <textarea id="string-final-states" rows="1"></textarea>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <br>
+                <button onclick="insertEpsilonVariable()">Insert &epsilon;</button>
+                <button onclick="generateTable()">Generate Transition Table</button>
 
-<!--[Convert NFA (transition table) into Regular grammars]-->
-    <div class="nfa-rg-left">
-        <p><strong>NFA (Input)</strong></p>
-        <div>*Separate the variables using comma (,)</div>
-        <div>
-            <table class="input-table-nfa">
-                <tr>
-                    <td id=td1>Σ</td>
-                    <td id="td2">
-                        <textarea id="string-variables" rows="1"></textarea>
-                    </td>
-                </tr>
-                <tr>
-                    <td id=td1>Q</td>
-                    <td id="td2">
-                        <textarea id="string-states" rows="1"></textarea>
-                    </td>
-                </tr>
-                <tr>
-                    <td id=td1>START</td>
-                    <td id="td2">
-                        <textarea id="string-start-state" rows="1"></textarea>
-                    </td>
-                </tr>
-                <tr>
-                    <td id="td1">FINAL</td>
-                    <td id="td2">
-                        <textarea id="string-final-states" rows="1"></textarea>
-                    </td>
-                </tr>
-            </table>
+                <button onclick="checkInput()">Test input</button>
+
+                <br><br>
+                <p><strong>Transition Table</strong></p>
+                    <div class="nfa-table">
+                        <table id="transition-table-nfa"></table>
+                    </div>
+                <button onclick="convertNFAtoRG()">Convert NFA to RG</button>   
         </div>
-        <br>
-        <button onclick="insertEpsilonVariable()">Insert &epsilon;</button>
-        <button onclick="generateTable()">Generate Transition Table</button>
-        <p><strong>Transition Table</strong></p>
-        <div class="nfa-table">
-            <table id="transition-table-nfa"></table>
-        </div>
-        <button onclick="convertNFAtoRG()">Convert NFA to RG</button>
+
+        <div class="col-md-3" style="margin-top: 1rem;">
+            <!--[Testing strings]-->
+            <p><strong>Regular Grammar</strong></p>
+                <div class="nfa-table">
+                    <table id="rg-table"></table>
+                </div>
+            <p style="margin-top: 10px;"><strong>Check Strings (Input)</strong></p>
+                <div>
+                    <textarea id="string-to-check" rows="10" spellcheck="false"></textarea>
+                    <textarea id="string-check-result" rows="10" cols="5" spellcheck="false"></textarea>
+                </div>
+            <button onclick="insertEpsilonVariableAtCheckString()">Insert &epsilon;</button>
+            <button onclick="getStringToCheck()">Check String</button>       
+        </div> 
+
+
+        <!--[Draw the NFA]-->
+        <div class="col-md-5" style="margin-top: 1rem;">
+            <p><strong>Draw NFA Diagram</strong></p>
+                <div class="nfa-table" style="height: 600px;">
+                    <canvas id="nfaCanvas" width="800" height="400"></canvas>    
+                </div>
+            <button onclick="drawNFADiagram()">Draw NFA</button>
+        </div>       
     </div>
-
-<!--[Testing strings]-->
-    <div class="nfa-rg-right">
-        <p><strong>Regular Grammar</strong></p>
-        <div class="nfa-table">
-            <table id="rg-table"></table>
-        </div>
-        <p><strong>Check Strings (Input)</strong></p>
-        <div>
-            <textarea id="string-to-check" rows="10" spellcheck="false"></textarea>
-            <textarea id="string-check-result" rows="10" cols="5" spellcheck="false"></textarea>
-        </div>
-        <button onclick="insertEpsilonVariableAtCheckString()">Insert &epsilon;</button>
-        <button onclick="getStringToCheck()">Check String</button>
-    </div>
-
-
-
-<!--[Draw the NFA]-->
-
-
+</div>
 
 </body>
+
 <script src="index.js"></script>
 </html>
