@@ -3,94 +3,97 @@ const nfaTransitionTable = new Map();
 const dfaTransitionTable = new Map();
 const FINAL_STATE_STRING = "FINAL";
 const STARTING_STATE_CHAR = 'A';
-const FILLER_KEY = 99999999999;
+const NULL_STATE_KEY = 99999999999;
 
 const nfaWithoutEpsilon = new Map();
 const tempNfa = new Map();
 const variableSetWithoutEpsilon = new Set();
 
-const dict = new Map();
+// To make sure all states in word is defined in the grammar.
+const userDefinedState = new Set();
+const wordDefinedState = new Set();
+
+// Mapping of DFA state name mapping. Used when converting NFA to DFA.
+const dfaStateNameMapping = new Map();
 
 function parseParagraph(paragraph) {
+    // Reset all transition table everytime a grammar is parsed.
     clearGlobalVariable();
 
+    //Reset error text.
+    document.getElementById("0").innerHTML = null
+
     var sentences = paragraph.trim().split("\n");
-    sentences.forEach(sentence => parseText(sentence));
-    console.log(sentences);
 
-    // Set first state as initial state.
-    getFirstState().isInitialState = true;
+    try {
+        sentences.forEach(sentence => {
+            parseSentence(sentence.trim())
+        });
 
-    console.log("Is NFA? " + isNFA());
+        const firstStateName = Array.from(userDefinedState.values())[0]
+        userDefinedState.delete(firstStateName);
+        if (!isSetEqual(userDefinedState, wordDefinedState))
+            throw "Some state(s) are not defined!"
+
+        // Set first state as initial state.
+        getFirstState().isInitialState = true;
+
+        convertToDfa();
+    } catch (error) {
+        document.getElementById("0").innerHTML = error
+    }
+
+    // print();
+}
+
+function convertToDfa() {
     findEpsilonClosure();
     createExtraStates();
     createDfa();
     removeUnusedState();
     renameDfaStateName();
-    print();
 }
 
-function parseText(sentence) {
-    let text = sentence.trim();
-    let arrowIndex = text.indexOf("-");
-    let stateString = text.substring(0, arrowIndex).trim();
-    let transitionText = text.substring(arrowIndex + 1, text.length)
-    const myArray = transitionText.split("|");
+function parseSentence(sentence) {
+    let arrowIndex = sentence.indexOf("-");
 
-    const state = new NfaState(stateString);
-    nfaTransitionTable.set(stateString, state);
+    // Arrow character is not found.
+    if (arrowIndex == -1)
+        throw "Invalid grammar sentence!"
+
+    if (arrowIndex == 0)
+        throw "State name not defined!"
+
+    let stateNameString = sentence.substring(0, arrowIndex).trim();
+    if (!isAlphaNumeric(stateNameString))
+        throw "Invalid state name for \"" + stateNameString + "\"!"
+    userDefinedState.add(stateNameString);
+
+    let transitionSentence = sentence.substring(arrowIndex + 1, sentence.length)
+    const stateTransitionWords = transitionSentence.split("|");
+
+    // This will throw exception is grammar is invalid.
+    checkWords(stateTransitionWords);
+
+    // Create starting state.
+    const state = new State(stateNameString);
+    nfaTransitionTable.set(stateNameString, state);
 
     let counter = 0;
 
-    myArray.forEach(element => {
-        parse(0, element.trim(), stateString, counter);
+    stateTransitionWords.forEach(element => {
+        parseStateTransition(0, element.trim(), stateNameString, counter);
         counter++;
     });
 
-    // myArray.forEach(element => {
-    //     const a = element.trim();
-    //     let firstChar = a.charAt(0);
-    //     if (a.length == 2) {
-    //         let stateName = a.charAt(1);
-    //         if (state.hasMapping(firstChar)) {
-    //             state.getMapping(firstChar).push(stateName);
-    //         } else {
-    //             state.addMapping(firstChar, [stateName]);
-    //         }
-    //         variableSet.add(firstChar);
-    //     } else if (a.length == 1) {
-    //         if (firstChar == "ε") {
-    //             state.isFinalState = true;
-    //         }
-    //         else if (isUppercase(firstChar)) {
-    //             // First char is State.
-    //             console.log(firstChar);
-    //             if (state.hasMapping("ε"))
-    //                 state.getMapping("ε").push(firstChar)
-    //             else
-    //                 state.addMapping("ε", [firstChar])
-    //         } else {
-    //             // First char is transition variable.
-    //             variableSet.add(firstChar);
-    //             if (!nfaTransitionTable.has(FINAL_STATE_STRING)) {
-    //                 const finalState = new NfaState(FINAL_STATE_STRING);
-    //                 finalState.isFinalState = true;
-    //                 nfaTransitionTable.set(FINAL_STATE_STRING, finalState);
-    //             }
-    //             // Create or update mapping based on transition variable.
-    //             if (state.hasMapping(firstChar)) {
-    //                 state.getMapping(firstChar).push(FINAL_STATE_STRING);
-    //             } else {
-    //                 state.addMapping(firstChar, [FINAL_STATE_STRING]);
-    //             }
-    //         }
-    //     }
-    // });
-
+    // Fill table of empty transition to null(∅).
     setAllEmptyMapping();
 }
 
-function parse(index, string, currentStateName, counter) {
+// Parse each state transition word (e.g. 01A, aaaC, bD)
+function parseStateTransition(index, string, currentStateName, counter) {
+
+    // Reach end of word then return.
     if (index >= string.length) {
         return;
     }
@@ -103,33 +106,35 @@ function parse(index, string, currentStateName, counter) {
         return;
     }
 
+    // If this is a single Uppercase character, then treat this as a state.
     if (isUppercase(currentChar)) {
         createOrAddMapping(currentState, "ε", currentChar);
         return;
     }
 
-    // Not an uppercase => a transition variable.
+    // Not an uppercase, therefore it's a transition variable.
     variableSet.add(currentChar);
+
+    // Check next character.
     if (index + 1 < string.length) {
         const nextChar = string.charAt(index + 1);
 
         if (isUppercase(nextChar)) {
             createOrAddMapping(currentState, currentChar, nextChar);
-            // return parse(index+1,string,currentStateName,counter);
             return;
         } else {
-            // Create temporary state.
+            // Create temporary state to handle multiple transition (e.g aaaB, 0101A).
             const tempStateName = currentStateName + counter;
-            const tempState = new NfaState(tempStateName);
+            const tempState = new State(tempStateName);
             nfaTransitionTable.set(tempStateName, tempState);
 
             createOrAddMapping(currentState, currentChar, tempStateName);
-            return parse(index + 1, string, tempStateName, counter + 1);
+            return parseStateTransition(index + 1, string, tempStateName, counter + 1);
         }
-
+        // This word does not contain state name (e.g aa, bb), then create a final state.
     } else {
         if (!nfaTransitionTable.has(FINAL_STATE_STRING)) {
-            const finalState = new NfaState(FINAL_STATE_STRING);
+            const finalState = new State(FINAL_STATE_STRING);
             finalState.isFinalState = true;
             nfaTransitionTable.set(FINAL_STATE_STRING, finalState);
         }
@@ -138,6 +143,7 @@ function parse(index, string, currentStateName, counter) {
     }
 }
 
+// Function to create or add mapping to the transition table.
 function createOrAddMapping(state, key, value) {
     if (state.hasMapping(key))
         state.getMapping(key).push(value)
@@ -145,16 +151,18 @@ function createOrAddMapping(state, key, value) {
         state.addMapping(key, [value])
 }
 
+
 function setAllEmptyMapping() {
     nfaTransitionTable.forEach(state => {
         variableSet.forEach(transitionVar => {
             if (!state.mapping.has(transitionVar)) {
-                state.addMapping(transitionVar, Array("∅"));
+                state.addMapping(transitionVar, ["∅"]);
             }
         })
     });
 }
 
+// Function to check the transition is NFA or DFA.
 function isNFA() {
     for (let [key, state] of nfaTransitionTable.entries()) {
         const epsilonArr = state.getMapping("ε");
@@ -186,42 +194,25 @@ function print() {
     console.log(nfaTransitionTable);
     console.log("NFA without eps");
     console.log(nfaWithoutEpsilon);
+    console.log("User Defined State");
+    console.log(userDefinedState);
+    console.log("Word Defined State");
+    console.log(wordDefinedState);
 }
 
+// Function to check given input is accepted by the machine or not.
 function checkStringDfa(str) {
     const initialState = Array.from(dfaTransitionTable.entries()).find(state => state[1].isInitialState);
-    let result = traverse(0, str, initialState[0])
-    console.log("Result : " + result)
+    let result = traverse(0, str, initialState[0]);
+    console.log("Result : " + result);
 
     document.getElementById("1").innerHTML = result;
 
     return result;
-
-    // var currentState = castToState(getFirstState());
-    // for (let i = 0; i < str.length; i++) {
-    //     let char = str[i];
-    //     if (!variableSet.has(char))
-    //         return false;
-
-    //     console.log("ch = " + char);
-    //     let nextStateString = currentState.getMapping(char);
-    //     console.log(nextStateString);
-    //     if (nfaTransitionTable.has(nextStateString)) {
-    //         currentState = castToState(nfaTransitionTable.get(nextStateString));
-    //     } else {
-    //         // Exit if last character.
-    //         if (i == str.length - 1)
-    //             break;
-    //         else
-    //             return false;
-    //     }
-    // };
-    // console.log(currentState);
-    // return currentState.isFinalState;
 }
 
+// Recursive function to walk each state given a string.
 function traverse(index, str, currentStateKey) {
-    console.log(currentStateKey);
     const currentState = dfaTransitionTable.get(currentStateKey);
     if (currentState == undefined) {
         return false;
@@ -234,20 +225,12 @@ function traverse(index, str, currentStateKey) {
     }
 }
 
-function printTable() {
-
-}
-
 function getFirstState() {
-    return nfaTransitionTable.entries().next().value[1];
+    return nfaTransitionTable.values().next().value;
 }
 
 function getInitialState() {
     return Array.from(dfaTransitionTable.values()).find(state => state.isInitialState);
-}
-
-function castToState(stateObject) {
-    return Object.assign(new NfaState(), stateObject)
 }
 
 function isUppercase(char) {
@@ -263,8 +246,38 @@ function isUppercase(char) {
     }
 }
 
-// This is NFA State
-class NfaState {
+function checkWords(wordArray) {
+    wordArray.forEach(w => {
+        const word = w.trim();
+        if (word === "")
+            throw "Invalid Grammar Syntax!";
+        if (!isAlphaNumeric(word) && word !== 'ε')
+            throw "Invalid word \"" + word + "\"!";
+
+        for (let index = 0; index < word.length; index++) {
+            const char = word.charAt(index);
+            if (isUppercase(char)) {
+                wordDefinedState.add(char);
+            }
+        }
+    })
+}
+
+function isAlphaNumeric(str) {
+    var code, i, len;
+
+    for (i = 0, len = str.length; i < len; i++) {
+        code = str.charCodeAt(i);
+        if (!(code > 47 && code < 58) && // numeric (0-9)
+            !(code > 64 && code < 91) && // upper alpha (A-Z)
+            !(code > 96 && code < 123)) { // lower alpha (a-z)
+            return false;
+        }
+    }
+    return true;
+};
+
+class State {
     name;
     // Map of transition variable to array of possible State.
     mapping;
@@ -296,13 +309,13 @@ class NfaState {
 function findNewInitialState() {
     const initialState = getFirstState();
     const newInitialState = new Set(getFirstState().name);
-    
+
     initialState.getMapping("ε").forEach(x => {
-        if (x != '∅'){
+        if (x != '∅') {
             newInitialState.add(x);
         }
     })
-    
+
     return [...newInitialState].flat();
 }
 
@@ -312,7 +325,7 @@ function findEpsilonClosure() {
             variableSetWithoutEpsilon.add(value);
     }
     for (const [stateKey, state] of nfaTransitionTable.entries()) {
-        const newState = new NfaState(stateKey);
+        const newState = new State(stateKey);
         for (const value of variableSetWithoutEpsilon) {
             newState.addMapping(String(value), getStatesKey(String(value), stateKey));
         }
@@ -322,7 +335,7 @@ function findEpsilonClosure() {
     }
 }
 
-// Create all possible combinations.
+// Create all possible combinations of states.
 function createExtraStates() {
     const keys = Array.from(nfaWithoutEpsilon.keys());
     const combinations = getCombinations(keys);
@@ -331,7 +344,7 @@ function createExtraStates() {
         if (combination.length == 1) {
             tempNfa.set(combination[0], nfaWithoutEpsilon.get(combination[0]));
         } else {
-            const newState = new NfaState(combination.join());
+            const newState = new State(combination.join());
             const stateArr = combination.map(stateKey => {
                 return nfaWithoutEpsilon.get(stateKey);
             });
@@ -354,19 +367,16 @@ function createExtraStates() {
     const currentInitialStateName = Array.from(tempNfa.values()).find(x => x.isInitialState).name;
     const currentInitialState = tempNfa.get(currentInitialStateName);
     currentInitialState.isInitialState = false;
-    console.log(findNewInitialState().join())
     const newInitialState = tempNfa.get(findNewInitialState().join());
     newInitialState.isInitialState = true;
 
-    // Empty state for null
-    const emptyState = new NfaState("∅");
+    // Empty state for null.
+    const emptyState = new State("∅");
     variableSetWithoutEpsilon.forEach(variable => {
         emptyState.addMapping(variable, ["∅"]);
     });
     tempNfa.set("∅", emptyState);
 }
-
-
 
 function createDfa() {
 
@@ -375,30 +385,26 @@ function createDfa() {
 
     let i = 0;
     for (const key of keys) {
-        // dict.set(String.fromCharCode(STARTING_STATE_CHAR.charCodeAt(0) + i), key.split(","));
-        dict.set(i, key.split(","));
+        dfaStateNameMapping.set(i, key.split(","));
         i++;
     }
-    dict.set(FILLER_KEY, ["∅"]);
-    // console.log(dict);
+    dfaStateNameMapping.set(NULL_STATE_KEY, ["∅"]);
 
     // Map it
-    for (const [key, state] of dict.entries()) {
+    for (const [key, state] of dfaStateNameMapping.entries()) {
         const nfaState = tempNfa.get((state.join()));
-        const newState = new NfaState(key);
+        const newState = new State(key);
         variableSetWithoutEpsilon.forEach(variable => {
             const oldKeyState = nfaState.getMapping(variable);
-            // console.log(findNewKey(oldKeyState));
             newState.addMapping(variable, findNewKey(oldKeyState));
         });
         newState.isFinalState = nfaState.isFinalState;
         newState.isInitialState = nfaState.isInitialState;
         dfaTransitionTable.set(key, newState);
     }
-
-    console.log(dict);
 }
 
+// Simplify DFA by removing all unreferenced state.
 function removeUnusedState() {
     let deleted = false;
     const referencedState = new Set();
@@ -451,16 +457,16 @@ function renameDfaStateName() {
 
 function findNewKey(array) {
     if (array.length == 1 && array[0] == "∅") {
-        return FILLER_KEY;
+        return NULL_STATE_KEY;
     } else {
-        for (const [key, state] of dict.entries()) {
+        for (const [key, state] of dfaStateNameMapping.entries()) {
             if (areArraysContentEqual(array, state)) {
                 return key;
             }
         }
     }
 }
-// 0,S
+
 function getEpsilon(variable, currentState) {
     currentState = String(currentState);
     let stateArr = new Set();
@@ -470,7 +476,6 @@ function getEpsilon(variable, currentState) {
         return [];
 
     stateArr.add(state.getMapping(variable));
-    // TODO check again
     for (const key of state.getMapping("ε")) {
         if (String(key) == "∅")
             continue;
@@ -494,8 +499,6 @@ function getStatesKey(variable, currentState) {
     return [...set].flat();
 }
 
-// Combinations
-
 function getCombinations(valuesArray) {
     var combi = [];
     var temp = [];
@@ -517,7 +520,6 @@ function getCombinations(valuesArray) {
 
 // Content equality checker
 function areArraysContentEqual(arr1, arr2) {
-    // Check if both arrays have the same length
     if (arr1.length !== arr2.length) {
         return false;
     }
@@ -534,6 +536,11 @@ function areArraysContentEqual(arr1, arr2) {
     return true;
 }
 
+function isSetEqual(xs, ys) {
+    return xs.size === ys.size &&
+        [...xs].every((x) => ys.has(x))
+}
+
 function clearGlobalVariable() {
     variableSet.clear();
     variableSet.add("ε");
@@ -542,5 +549,7 @@ function clearGlobalVariable() {
     nfaWithoutEpsilon.clear();
     dfaTransitionTable.clear();
     tempNfa.clear();
-    dict.clear();
+    dfaStateNameMapping.clear();
+    userDefinedState.clear();
+    wordDefinedState.clear();
 }
