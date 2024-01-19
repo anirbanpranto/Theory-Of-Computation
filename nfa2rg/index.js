@@ -10,7 +10,6 @@ function insertEpsilonVariableAtCheckString() {
 }
 
 // ------------------------ convertRGtoNFA module ----------------------------------------
-
 function getVariablesNFA() {
     var listOfVariables = [];
     var stringVariables = document.getElementById('string-variables').value;
@@ -20,7 +19,6 @@ function getVariablesNFA() {
         console.error('Error: Var input is empty.');
         return; // Exit the function if input is empty
     }
-
     // Remove commas from the input string
     var stringVariablesNoComma = stringVariables.replace(/,/g, '');
     
@@ -145,7 +143,6 @@ function generateTable() {
         }
         tableBody += '</tr>';
     }
-
     // Display the table
     document.getElementById('transition-table-nfa').innerHTML = tableBody;
 }
@@ -206,7 +203,6 @@ function convertNFAtoRG() {
             regularGrammar += stateGrammar + '<br>';
         }
     }
-
     // Display the result
     document.getElementById('rg-table').innerHTML = regularGrammar;
 }
@@ -309,79 +305,234 @@ function checkString(stringToCheck) {
 }
 
 // ------------------------ Draw NFA Diagram module ----------------------------------------
-
- // Define your NFA states and transitions
- //const nfaStates = ['q0', 'q1', 'q2'];
- //const nfaTransitions = [
- //    { from: 'q0', to: 'q1', label: 'a' },
- //    { from: 'q1', to: 'q2', label: 'b' },
- //    { from: 'q2', to: 'q0', label: 'c' }
-     // Add more transitions as needed
- //];
-
  // Function to draw NFA diagram
- function drawNFADiagram() {
+ 
+const offsetX = - 60;
 
-     // Initialize variables
-     var listOfVariables, listOfStates, listOfFinalStates, startState;
+function drawNFADiagram() {
+    // Get NFA data
+    var listOfStates = getStatesNFA();
+    var listOfVariables = getVariablesNFA();
+    var listOfFinalStates = getFinalStatesNFA();
 
-     // Get input variables, states, final states, and start state
-     listOfVariables = getVariablesNFA();
-     listOfStates = getStatesNFA();
-     listOfFinalStates = getFinalStatesNFA();
-     startState = getStartStateNFA();
+    // Get canvas context
+    const canvas = document.getElementById('nfaCanvas');
+    const ctx = canvas.getContext('2d');
 
-
-
-     const canvas = document.getElementById('nfaCanvas');
-     const ctx = canvas.getContext('2d');
-
-     // Clear canvas
-     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw start state
-    ctx.beginPath();
-    ctx.arc(50, 150, 40, 0, 2 * Math.PI);
-    ctx.arc(50, 150, 35, 0, 2 * Math.PI);
-    ctx.stroke();
-    ctx.fillText(startState, 50, 150);
-
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+   
     // Draw states
-  
-    var c = 0;
-    for (var j = 0; j < listOfStates.length; j++){
+    for (var i = 0; i < listOfStates.length; i++) {
+        var x = offsetX + (i + 1) * canvas.width / (listOfStates.length + 1);
+        var y = canvas.height / 2;
 
         ctx.beginPath();
-        ctx.arc((50+c), 150, 40, 0, 2 * Math.PI);
-        
+        ctx.arc(x, y, 25, 0, 2 * Math.PI);
         ctx.stroke();
-        ctx.fillText(listOfStates[j], (50+c), 150);
-        c=c+120;
+
+        // Display state name
+        ctx.fillText(listOfStates[i], x, y);
+
+        // Mark start state and final states
+        if (i === 0) {
+            // Mark start state
+            ctx.beginPath();
+            ctx.moveTo(x - 25, y);
+            ctx.lineTo(x - 60, y);
+    
+            // Draw arrowhead
+            ctx.moveTo(x - 35, y - 10);
+            ctx.lineTo(x - 25, y);
+            ctx.moveTo(x - 35, y + 10);
+            ctx.lineTo(x - 25 , y);
+
+            ctx.fillText('Start', x - 60, y - 30);
+
+        }
+        if (listOfFinalStates.includes(listOfStates[i])) {
+            // Mark final states
+            ctx.fillText('Final', x, y + 40);
+            ctx.beginPath();
+            ctx.arc(x, y, 20, 0, 2 * Math.PI);
+        }
+         ctx.stroke();
     }
 
-    // Draw final state
-    //ctx.beginPath();
-    //ctx.arc(50, 150, 40, 0, 2 * Math.PI);
-    //ctx.arc(50, 150, 35, 0, 2 * Math.PI);
-    //ctx.stroke();
-    //ctx.fillText(startState, 50, 150);
+    // Draw transitions
+    for (var i = 0; i < listOfStates.length; i++) {
+        for (var j = 0; j <= listOfVariables.length; j++) {
+            if (j !== 0) {
+                var stateTransitionData = document.getElementById('tableInput' + i + j).value.toUpperCase();
 
+                if (stateTransitionData !== '∅' && stateTransitionData !== "" && stateTransitionData.length > 1) {
+                    var stateTransitionDataNoComma = stateTransitionData.replace(/,/g, '');
+                    for (var x = 0; x < stateTransitionDataNoComma.length; x++) {
+                        // Draw a line for each transition
+                        var nextIndex = listOfStates.indexOf(stateTransitionDataNoComma[x]);
+                        if (i === nextIndex) {
+                            // Draw a loop arrow for self-transition
+                            drawLoopArrow(ctx, i,listOfVariables[j-1]);
+                        } else {
+                            drawLine(ctx, i, nextIndex,listOfVariables[j-1]);     
+                        }
+                    }
+                }
+
+                if (stateTransitionData !== '∅' && stateTransitionData !== "" && stateTransitionData.length <= 1) {
+                    // Draw a line for the transition
+                    var nextIndex = listOfStates.indexOf(stateTransitionData);
+                    if (i === nextIndex) {
+                        // Draw a loop arrow for self-transition
+                        drawLoopArrow(ctx, i,listOfVariables[j-1]);
+                    } else {
+                        drawLine(ctx, i, nextIndex,listOfVariables[j-1]);
+                    }        
+                }
+            }
+        }
+    }
+}
+
+// Helper function to draw a line between states with arrowhead
+function drawLine(ctx, fromIndex, toIndex,label) {
+    const canvas = document.getElementById('nfaCanvas');
+    const radius = 20; // radius of the circle
+    var listOfStates = getStatesNFA();
+    
+    var fromX = offsetX + (fromIndex + 1) * canvas.width / (listOfStates.length + 1);
+    var fromY = canvas.height / 2;
+    var toX = offsetX + (toIndex + 1) * canvas.width / (listOfStates.length + 1);
+    var toY = canvas.height / 2;
+    const arrowSize = 10;
+
+    // Calculate the angle between the line and the x-axis
+    var angle = Math.atan2(toY - fromY, toX - fromX);
+    // Calculate the starting and ending point on the circumference of the circle
+    var startX = fromX + radius * Math.cos(angle);
+    var startY = fromY + radius * Math.sin(angle);
+    var endX = toX - radius * Math.cos(angle);
+    var endY = toY - radius * Math.sin(angle); 
+
+    var distance = Math.abs((startX-endX));
+    console.log(distance);
+    
+    if(fromX > toX){
+       
+        if (distance > 300) {
+
+            const controlX = (startX + endX) / 2;
+            const controlY = fromY + 100; // You can adjust the control point Y coordinate as needed
+    
+            ctx.beginPath();
+            ctx.moveTo(startX, startY + 20);
+            ctx.quadraticCurveTo(controlX, controlY, endX, endY + 20);
+    
+            // Draw arrowhead
+            ctx.moveTo(endX, endY + 20);
+            ctx.lineTo(endX + arrowSize, ((endY+20)  - arrowSize));
+            ctx.moveTo(endX, endY + 20);
+            ctx.lineTo(endX-5 + arrowSize, ((endY+45) - arrowSize));
+    
+             // Mark the string for transition
+            var arrowX = (fromIndex + toIndex + 2) * canvas.width / (2 * (listOfStates.length + 1));
+            var arrowY = canvas.height / 2;
+            var transitionLabel = label;
      
+            ctx.fillText(transitionLabel, arrowX + offsetX, arrowY + 80);
+
+        } else {   
+
+            const controlX = (startX + endX) / 2;
+            const controlY = fromY + 30; // You can adjust the control point Y coordinate as needed
+
+            ctx.beginPath();
+            ctx.moveTo(startX, startY + 20);
+            ctx.quadraticCurveTo(controlX, controlY, endX, endY + 20);
+
+            // Draw arrowhead
+            ctx.moveTo(endX, endY + 20);
+            ctx.lineTo(endX + arrowSize, ((endY+20)  - arrowSize));
+            ctx.moveTo(endX, endY + 20);
+            ctx.lineTo(endX + arrowSize, ((endY+40) - arrowSize));
+
+            // Mark the string for transition
+            var arrowX = (fromIndex + toIndex + 2) * canvas.width / (2 * (listOfStates.length + 1));
+            var arrowY = canvas.height / 2;
+            var transitionLabel = label;
+    
+            ctx.fillText(transitionLabel, arrowX + offsetX, arrowY + 40);
+        }
+
+    }else{
+
+        if (distance > 300) {
+
+            const controlX = (startX + endX) / 2;
+            const controlY = fromY - 110; // You can adjust the control point Y coordinate as needed
+           
+            ctx.beginPath();
+            ctx.moveTo(startX, startY - 20);
+            ctx.quadraticCurveTo(controlX, controlY, endX-5, endY - 20);
+    
+            // Draw arrowhead
+            ctx.moveTo(endX-5, endY - 20);
+            ctx.lineTo(endX-5 - 20 + arrowSize, ((endY)  - arrowSize));
+            ctx.moveTo(endX-5, endY - 20);
+            ctx.lineTo(endX-5 - 20 + arrowSize, ((endY-25) - arrowSize));
+    
+             // Mark the string for transition
+            var arrowX = (fromIndex + toIndex + 2) * canvas.width / (2 * (listOfStates.length + 1));
+            var arrowY = canvas.height / 2;
+            var transitionLabel = label;
      
-     // Draw transitions
-     for (const transition of nfaTransitions) {
-         const fromState = nfaStates.indexOf(transition.from);
-         const toState = nfaStates.indexOf(transition.to);
+            ctx.fillText(transitionLabel, arrowX + offsetX, arrowY - 70);
+        }else{
+            // Calculate arrowhead points
+            var arrowX1 = endX - arrowSize * Math.cos(angle - Math.PI / 6);
+            var arrowY1 = endY - arrowSize * Math.sin(angle - Math.PI / 6);
+            var arrowX2 = endX - arrowSize * Math.cos(angle + Math.PI / 6);
+            var arrowY2 = endY - arrowSize * Math.sin(angle + Math.PI / 6);
 
-         ctx.beginPath();
-         ctx.moveTo(100, 150); // Coordinates of the from state
-         ctx.lineTo(200, 150); // Coordinates of the to state
-         ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(startX + 10, startY);
+            ctx.lineTo(endX - 10, endY);
 
-         // Draw label
-         ctx.fillText(transition.label, (100 + 200) / 2, 150);
-     }
- }
+            // Draw arrowhead
+            ctx.moveTo(endX - 10, endY);
+            ctx.lineTo(arrowX1 - 10, arrowY1);
+            ctx.moveTo(endX - 10, endY);
+            ctx.lineTo(arrowX2 - 10, arrowY2);
 
+            // Mark the string for transition
+            var arrowX = (fromIndex + toIndex + 2) * canvas.width / (2 * (listOfStates.length + 1));
+            var arrowY = canvas.height / 2;
+            var transitionLabel = label;
 
+            ctx.fillText(transitionLabel, arrowX + offsetX, arrowY - 10);
+        } 
+    }
+    ctx.stroke();
+}
 
+// Helper function to draw a loop arrow for self-transition
+function drawLoopArrow(ctx, stateIndex, label) {
+    const canvas = document.getElementById('nfaCanvas');
+    var listOfStates = getStatesNFA();
+
+    var x = offsetX + (stateIndex + 1) * canvas.width / (listOfStates.length + 1);
+    var y = canvas.height / 2;
+
+    ctx.beginPath();
+    ctx.moveTo(x, y - 20);
+    // Draw a small half-circle loop
+    ctx.arc(x, y - 20, 20, Math.PI, 0);
+
+    // Draw arrowhead
+    ctx.moveTo(x - 20, y - 20);
+    ctx.lineTo(x - 30, y - 30);
+
+    // Draw the label on top of the line
+    ctx.fillText(label, x, y - 50);
+    ctx.stroke();
+}
