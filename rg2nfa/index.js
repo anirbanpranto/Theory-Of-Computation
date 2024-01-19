@@ -31,9 +31,11 @@ function parseParagraph(paragraph) {
         });
 
         const firstStateName = Array.from(userDefinedState.values())[0]
-        userDefinedState.delete(firstStateName);
+        if(!wordDefinedState.has(firstStateName)){
+            userDefinedState.delete(firstStateName);
+        }
         if (!isSetEqual(userDefinedState, wordDefinedState))
-            throw "Some state(s) are not defined!"
+            throw "Some state(s) are not defined/referenced!"
 
         // Set first state as initial state.
         getFirstState().isInitialState = true;
