@@ -59,8 +59,8 @@
         <div class="col-md-4" style="margin-top: 1rem;">
                 <div class=""></div>
                 <p><strong>NFA (Input)</strong></p>
-                <div>*Separate the variables using comma (,)</div>
-                <div>*No need to enter the space bar</div>
+                <div>*Separate the variables using comma (,) [*No need to enter the space bar*]</div>
+                <div>*To enter the data for a finite set of states, you need to follow the sequence: <br> Start state -> Other state(s) -> Final state.</div><br>
                 <div>
                     <table class="input-table-nfa">
                         <tr>
@@ -91,25 +91,27 @@
                 </div>
                 <br>
                 <button onclick="insertEpsilonVariable()">Insert &epsilon;</button>
-                <button onclick="generateTable()">Generate Transition Table</button>
-
-                <button onclick="checkInput()">Test input</button>
+                <button onclick="generateTable()">Generate Transition Table</button>              
 
                 <br><br>
                 <p><strong>Transition Table</strong></p>
+                <div>*Enter the transition values into the table below.</div>
+                <div>*Click the button below labeled 'Convert NFA to RG' to generate the regular grammar.</div>
                     <div class="nfa-table">
                         <table id="transition-table-nfa"></table>
                     </div>
                 <button onclick="convertNFAtoRG()">Convert NFA to RG</button>   
         </div>
 
-        <div class="col-md-3" style="margin-top: 1rem;">
+        <div class="col-md-2" style="margin-top: 1rem;">
             <!--[Testing strings]-->
             <p><strong>Regular Grammar</strong></p>
                 <div class="nfa-table">
                     <table id="rg-table"></table>
                 </div>
+                <br><br><br>
             <p style="margin-top: 10px;"><strong>Check Strings (Input)</strong></p>
+            <div>*Enter the testing strings row by row into the left column.</div>
                 <div>
                     <textarea id="string-to-check" rows="10" spellcheck="false"></textarea>
                     <textarea id="string-check-result" rows="10" cols="5" spellcheck="false"></textarea>
@@ -118,12 +120,12 @@
             <button onclick="getStringToCheck()">Check String</button>       
         </div> 
 
-
         <!--[Draw the NFA]-->
         <div class="col-md-5" style="margin-top: 1rem;">
             <p><strong>Draw NFA Diagram</strong></p>
+            <div>*Click the button below labeled 'Draw NFA' to generate the NFA diagram.</div>
                 <div class="nfa-table" style="height: 600px;">
-                    <canvas id="nfaCanvas" width="800" height="400"></canvas>    
+                    <canvas id="nfaCanvas" width="700" height="400"></canvas>    
                 </div>
             <button onclick="drawNFADiagram()">Draw NFA</button>
         </div>       
