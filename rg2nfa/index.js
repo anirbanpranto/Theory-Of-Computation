@@ -24,7 +24,7 @@ T - R | ε
  * **/
 
 function drawHeader(tableName, row_data){
-    let table = document.getElementById(tableName);
+    let table = document.getElementById(tableName); 
     
     let row = table.insertRow(0); 
     
@@ -52,6 +52,8 @@ function drawRow(tableName, row_data, num_row, row_name){
 function drawNFATable(){
     let header_obj = document.getElementById("epnfaH");
     header_obj.innerHTML = "Transition Table"
+    let table = document.getElementById("epnfa");
+    table.innerHTML = ""
     let keys = Array.from(nfaTransitionTable.keys())
     //keys = keys.reverse();
     let alphabets = []
@@ -73,6 +75,8 @@ function drawNFATable(){
 function drawNFAwithoutEpsilonTable(){
     let header_obj = document.getElementById("nepnfaH");
     header_obj.innerHTML = "Transition Table w/o ε"
+    let table = document.getElementById("nepnfa");
+    table.innerHTML = ""
     let keys = Array.from(nfaWithoutEpsilon.keys());
     
     let alphabets = []
@@ -136,7 +140,7 @@ function convertToDfa() {
 }
 
 function parseSentence(sentence) {
-    let arrowIndex = sentence.indexOf("-");
+    let arrowIndex = sentence.indexOf("->");
 
     // Arrow character is not found.
     if (arrowIndex == -1)
@@ -149,6 +153,7 @@ function parseSentence(sentence) {
     if (!isAlphaNumeric(stateNameString))
         throw "Invalid state name for \"" + stateNameString + "\"!"
     userDefinedState.add(stateNameString);
+    arrowIndex = arrowIndex + 1;
 
     let transitionSentence = sentence.substring(arrowIndex + 1, sentence.length)
     const stateTransitionWords = transitionSentence.split("|");
@@ -266,7 +271,16 @@ function isNFA() {
 
 function drawChecks(results){
     const checkStrings = document.getElementById("check_status");
-    checkStrings.innerHTML = results.toString(); 
+    let checks = "";
+    results.forEach(item => {
+        if(item) {
+            checks += '<span style="color: green;">OK<span><br>'
+        }
+        else{
+            checks += '<span style="color: red;">NO\n<span><br>'
+        }
+    })
+    checkStrings.innerHTML = checks; 
 }
 
 function print() {
