@@ -12,9 +12,3 @@ th, td {
 h2 {
 	padding-top: 20px;
 }
-
-.float-child {
-    width: 50%;
-    float: left;
-    padding: 20px;
-} 
