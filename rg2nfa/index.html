@@ -6,7 +6,55 @@
     <title>Regular Grammer to NFA</title>
 </head>
 <body>
-   <h1 id="random"></h1> 
+    <h1>RG To NFA</h1> 
+    <textarea id="inputString" name="Input" rows="4" cols="50"></textarea>
+    <!-- <textarea type="text" id="inputString"></textarea> -->
+    <button onclick="parseParagraph(document.getElementById('inputString').value)">Parse</button>
+    <p id="0"style="color:red;"></p>
+    <textarea id="checkStringInput" name="strInput" rows="4" cols="50"></textarea>
+    <button onclick="checkStringDfa(document.getElementById('checkStringInput').value)">Check</button>
+   <p id="1"></p>
+   <p> <b>Instructions</b>
+    <br>
+    1. Input regular grammar (example: S - aS | ε )
+    <br>
+    2. Each sentence is separated by line break (Enter or "\n")
+    <br>
+    3. State must be one uppercase alphabet [A-Z]
+    <br>
+    4. Transition variable can be number [0-9] or lowercase alphabet [a-z]
+    <br>
+    5. First sentence will be an initial state (entry point)
+    <br>
+    6. Sentence arrow is denoted by a hyphen ("-") ex. S -> aS (❌),  S - aS (✔️) [Will change later]
+    <br>
+    7. Multiple transition variable is denoted by a pipe ("|") ex. aS | bA | abB
+    <br>
+    8. No space for each transition ex. S - a S (❌), S - aS (✔️)
+   </p>
+   <p> <b>How To Use</b>
+    <br>
+    1. Input regular grammar sentences on top textbox
+    <br>
+    2. Click Parse
+    <br>
+    3. Input strings to be checked (Currently supports only one sentence)
+    <br>
+    4. Click Check and the result will be shown below (True for accepted and false for rejected).
+    <br>
+   </p>
 </body>
 <script src="index.js"></script>
+
+<!-- Testing regular grammar template  -->
+<!-- <script>parseParagraph("S - A | D\n A - 1B\n    B - 0B | 1B | 1\n D - 0E\nE - 0E | 1E | 0")</script> -->
+<!-- <script>parseParagraph("A - 11A | 0E | 110A \n E - ε")</script> -->
+<!-- <script>parseParagraph("S - 010B\nB - 111C | 10B\nC - 0 | 01C")</script> -->
+<!-- <script>parseParagraph("S - A|B \n A-ε|aA \n B - ε|bbB")</script> -->
+<!-- <script>parseParagraph("S - aaA | A\n A - ε")</script> -->
+<!-- <script>parseParagraph("S - A | baB\nA - ε | baA \nB - ε | bB")</script> -->
+<!-- <script>parseParagraph("S - bS | aA \n A -  bA | aB \n B - aB | bB | c")</script> -->
+<!-- <script>parseParagraph("A - 1B|0C \n  C - 1A | B \n B - ε")</script> -->
+<!-- <script>parseParagraph("S - 1A | 1S | 0S \n A-ε")</script> -->
+<!-- <script>parseParagraph("S - aS | bA | bS \n A - aS | bB \n B - ε")</script> -->
 </html>

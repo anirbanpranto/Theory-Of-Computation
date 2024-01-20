@@ -1,0 +1,39 @@
+body {
+	padding: 0;
+	margin: 0;
+}
+.main-wrapper {
+	max-width: 650px;
+	margin: 5rem auto 0;
+	border: 1px solid #777;
+	padding: 0 1rem 1rem;
+	text-align: center;
+}
+.tab-container {
+	margin-top: -12px;
+	max-width: 320px;
+	background: #fff;
+}
+.members {
+	display: flex;
+	justify-content: center;
+	grid-gap: 1.5rem;
+}
+.members img {
+	padding: 5px;
+	max-width: 120px;
+}
+.members img.leader {
+	border: 1px solid #333;
+}
+button {
+	margin: 0;
+	padding: 5px 10px;
+	border-radius: 0;
+	border: 1px solid #777;
+	background: #ccc;
+	cursor: pointer;
+}
+button.active {
+	background: #fff;
+}
