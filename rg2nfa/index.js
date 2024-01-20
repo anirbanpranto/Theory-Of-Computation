@@ -16,6 +16,81 @@ const wordDefinedState = new Set();
 // Mapping of DFA state name mapping. Used when converting NFA to DFA.
 const dfaStateNameMapping = new Map();
 
+/**
+A - aR
+R - bR | aS
+S - bT
+T - R | ε 
+ * **/
+
+function drawHeader(tableName, row_data){
+    let table = document.getElementById(tableName);
+    
+    let row = table.insertRow(0); 
+    
+    row_data.forEach((item) => { 
+        let cell = row.insertCell(0);
+        cell.innerHTML = item.toString();
+    })
+    let cell_name = row.insertCell(0);
+    cell_name.innerHTML = ""; 
+}
+
+function drawRow(tableName, row_data, num_row, row_name){
+    let table = document.getElementById(tableName);
+    
+    let row = table.insertRow(num_row); 
+    
+    row_data.forEach((item) => { 
+        let cell = row.insertCell(0);
+        cell.innerHTML = item.toString();
+    })
+    let cell_name = row.insertCell(0);
+    cell_name.innerHTML = row_name; 
+}
+
+function drawNFATable(){
+    let header_obj = document.getElementById("epnfaH");
+    header_obj.innerHTML = "Transition Table"
+    let keys = Array.from(nfaTransitionTable.keys())
+    //keys = keys.reverse();
+    let alphabets = []
+    if (keys.length > 0) {
+        alphabets = Array.from(nfaTransitionTable.get(keys[0])["mapping"].keys()); 
+        alphabets = alphabets.sort();
+    } 
+    keys.forEach((key, idx) => {
+        console.log(key)
+        const mapping = nfaTransitionTable.get(key)["mapping"]
+        const sorted = [...mapping].sort().reverse();
+        const sorted_mapping = new Map(sorted);
+        //draw one row
+        drawRow("epnfa", sorted_mapping, idx, key)
+    })
+    drawHeader("epnfa", alphabets.reverse())
+}
+
+function drawNFAwithoutEpsilonTable(){
+    let header_obj = document.getElementById("nepnfaH");
+    header_obj.innerHTML = "Transition Table w/o ε"
+    let keys = Array.from(nfaWithoutEpsilon.keys());
+    
+    let alphabets = []
+    if (keys.length > 0) {
+        alphabets = Array.from(nfaWithoutEpsilon.get(keys[0])["mapping"].keys()); 
+        alphabets = alphabets.sort();
+    } 
+    keys.forEach((key, idx) => {
+        console.log(key)
+        const mapping = nfaWithoutEpsilon.get(key)["mapping"]
+        const sorted = [...mapping].sort().reverse();
+        const sorted_mapping = new Map(sorted);
+        //draw one row
+        drawRow("nepnfa", sorted_mapping, idx, key)
+    })
+    drawHeader("nepnfa", alphabets.reverse())
+}
+
 function parseParagraph(paragraph) {
     // Reset all transition table everytime a grammar is parsed.
     clearGlobalVariable();
@@ -29,6 +104,8 @@ function parseParagraph(paragraph) {
         sentences.forEach(sentence => {
             parseSentence(sentence.trim())
         });
+ 
+        drawNFATable();
 
         const firstStateName = Array.from(userDefinedState.values())[0]
         if(!wordDefinedState.has(firstStateName)){
@@ -41,6 +118,8 @@ function parseParagraph(paragraph) {
         getFirstState().isInitialState = true;
 
         convertToDfa();
+        
+        drawNFAwithoutEpsilonTable();
     } catch (error) {
         document.getElementById("0").innerHTML = error
     }
@@ -185,6 +264,11 @@ function isNFA() {
     return false;
 }
 
+function drawChecks(results){
+    const checkStrings = document.getElementById("check_status");
+    checkStrings.innerHTML = results.toString(); 
+}
+
 function print() {
     console.log(variableSet);
     console.log(nfaWithoutEpsilon);
@@ -208,6 +292,7 @@ function checkStrings(strings){
     listOfStrings.forEach(string =>{
         checkResults.push(checkStringDfa(string))
     })
+    drawChecks(checkResults)
     console.log("Results",checkResults);
 }
 
