@@ -202,14 +202,19 @@ function print() {
     console.log(wordDefinedState);
 }
 
+function checkStrings(strings){
+    listOfStrings = strings.trim().split("\n");
+    const checkResults = []
+    listOfStrings.forEach(string =>{
+        checkResults.push(checkStringDfa(string))
+    })
+    console.log("Results",checkResults);
+}
+
 // Function to check given input is accepted by the machine or not.
 function checkStringDfa(str) {
     const initialState = Array.from(dfaTransitionTable.entries()).find(state => state[1].isInitialState);
     let result = traverse(0, str, initialState[0]);
-    console.log("Result : " + result);
-
-    document.getElementById("1").innerHTML = result;
-
     return result;
 }
 
