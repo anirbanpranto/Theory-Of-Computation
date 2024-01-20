@@ -8,15 +8,48 @@
 </head>
 <body>
     <h1>RG To NFA</h1> 
-    <textarea id="inputString" name="Input" rows="4" cols="50"></textarea>
+    <table style="border: none;"> 
+        <td style="border: none;padding: 0;">
+            <textarea id="inputString" name="Input" rows="4" cols="50"></textarea>
+        </td>
+        <td style="border: none; padding-top: 0; padding-bottom: 0;">
+            <p>
+            </p>
+        </td>
+        <td style="border: none;">
+            <button onclick="parseParagraph(document.getElementById('inputString').value)">Parse</button>
+        </td>
+    </table> 
+    
     <!-- <textarea type="text" id="inputString"></textarea> -->
-    <button onclick="parseParagraph(document.getElementById('inputString').value)">Parse</button>
+    
     <p id="0"style="color:red;"></p>
-    <textarea id="checkStringInput" name="strInput" rows="4" cols="50"></textarea>
-    <button onclick="checkStrings(document.getElementById('checkStringInput').value)">Check</button>
-
-    <p id="check_status">
-    </p>
+    <table style="border: none;"> 
+        <td style="border: none;padding: 0;">
+            <textarea id="checkStringInput" name="strInput" rows="10" cols="50"></textarea>
+        </td>
+        <td style="border: none;">
+            <p id="check_status">
+            </p>
+        </td>
+        <td style="border: none;">
+            <button onclick="checkStrings(document.getElementById('checkStringInput').value)">Check</button>
+        </td>
+    </table> 
+    <table style="border: none;">
+        <td style="border: none;">
+            <h2 id="epnfaH"></h2>
+            <table id="epnfa">
+                
+            </table>
+        </td>
+        <td style="border: none;">
+            <h2 id="nepnfaH"></h2>
+            <table id="nepnfa">
+    
+            </table>
+        </td>
+       </table>
    <p id="1"></p>
    <p> <b>Instructions</b>
     <br>
@@ -30,43 +63,33 @@
     <br>
     5. First sentence will be an initial state (entry point)
     <br>
-    6. Sentence arrow is denoted by a hyphen ("-") ex. S -> aS (❌),  S - aS (✔️) [Will change later]
+    6. Sentence arrow is denoted by a hyphen ("->") ex. S - aS (❌),  S -> aS (✔️)
     <br>
     7. Multiple transition variable is denoted by a pipe ("|") ex. aS | bA | abB
     <br>
-    8. No space for each transition ex. S - a S (❌), S - aS (✔️)
+    8. No space for each transition ex. S -> a S (❌), S -> aS (✔️)
    </p>
    <p> <b>How To Use</b>
     <br>
     1. Input regular grammar sentences on top textbox
     <br>
-    2. Click Parse
+    2. Click Parse 
     <br>
-    3. Input strings to be checked (Currently supports only one sentence)
+    3. Click Check and the result will be shown below (OK for accepted and NO for rejected).
     <br>
-    4. Click Check and the result will be shown below (True for accepted and false for rejected).
-    <br>
-   </p>
-   <h2 id="epnfaH"></h2>
-   <table id="epnfa">
-    
-   </table>
-   <h2 id="nepnfaH"></h2>
-   <table id="nepnfa">
-
-   </table>
+   </p> 
 </body>
 <script src="index.js"></script>
 
 <!-- Testing regular grammar template  -->
-<!-- <script>parseParagraph("S - A | D\n A - 1B\n    B - 0B | 1B | 1\n D - 0E\nE - 0E | 1E | 0")</script> -->
-<!-- <script>parseParagraph("A - 11A | 0E | 110A \n E - ε")</script> -->
-<!-- <script>parseParagraph("S - 010B\nB - 111C | 10B\nC - 0 | 01C")</script> -->
-<!-- <script>parseParagraph("S - A|B \n A-ε|aA \n B - ε|bbB")</script> -->
-<!-- <script>parseParagraph("S - aaA | A\n A - ε")</script> -->
-<!-- <script>parseParagraph("S - A | baB\nA - ε | baA \nB - ε | bB")</script> -->
-<!-- <script>parseParagraph("S - bS | aA \n A -  bA | aB \n B - aB | bB | c")</script> -->
-<!-- <script>parseParagraph("A - 1B|0C \n  C - 1A | B \n B - ε")</script> -->
-<!-- <script>parseParagraph("S - 1A | 1S | 0S \n A-ε")</script> -->
-<!-- <script>parseParagraph("S - aS | bA | bS \n A - aS | bB \n B - ε")</script> -->
+<!-- <script>parseParagraph("S -> A | D\n A -> 1B\n    B -> 0B | 1B | 1\n D -> 0E\nE - 0E | 1E | 0")</script>
+<script>parseParagraph("A -> 11A | 0E | 110A \n E -> ε")</script>
+<script>parseParagraph("S -> 010B\nB -> 111C | 10B\nC -> 0 | 01C")</script>
+<script>parseParagraph("S -> A|B \n A->ε|aA \n B -> ε|bbB")</script>
+<script>parseParagraph("S -> aaA | A\n A -> ε")</script>
+<script>parseParagraph("S -> A | baB\nA -> ε | baA \nB -> ε | bB")</script>
+<script>parseParagraph("S -> bS | aA \n A ->  bA | aB \n B -> aB | bB | c")</script>
+<script>parseParagraph("A -> 1B|0C \n  C -> 1A | B \n B -> ε")</script>
+<script>parseParagraph("S -> 1A | 1S | 0S \n A->ε")</script>
+<script>parseParagraph("S -> aS | bA | bS \n A -> aS | bB \n B -> ε")</script> -->
 </html>
