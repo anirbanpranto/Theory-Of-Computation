@@ -9,7 +9,7 @@ function insertEpsilonVariableAtCheckString() {
     text.value += '\u03B5';
 }
 
-// ------------------------ convertRGtoNFA module ----------------------------------------
+// ------------------------ convertNFAroRG module ----------------------------------------
 function getVariablesNFA() {
     var listOfVariables = [];
     var stringVariables = document.getElementById('string-variables').value;
