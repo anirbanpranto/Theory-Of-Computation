@@ -7,8 +7,19 @@ th, td {
 	border-collapse: collapse;
 	padding-left: 20px;
 	padding-right: 20px;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-h2 {
+h2,h1 {
+	font-family: sans-serif;
 	padding-top: 20px;
+}
+
+p,div { 
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+textarea{
+	font-size: 20px;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
