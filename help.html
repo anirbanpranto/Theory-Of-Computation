@@ -17,7 +17,8 @@
         <h1 style="text-align: center;">Help + Doc</h1>
         <table style="border: none;">
             <td style="border: none; margin-left: 20px; padding-top: 0; padding-bottom: 0;">
-                <p> <b>Instructions</b>
+                <p><b>RG to NFA Instructions</b>
+                    <br>
                     <br>
                     1. Input regular grammar (example: S → aS | ε )
                     <br>
@@ -39,6 +40,34 @@
                     <br>
                     &nbsp;&nbsp;&nbsp; letter after an uppercase letter will be ignored. ex. aSaaa (will be read as aS ), Ca
                     (will be parse as C)
+                </p>
+
+                <p><b>NFA to RG Instructions</b>
+                    <br>
+                    <br>
+                    1. Click the ‘Insert ε’ button to insert the epsilon symbol into the "String Variables" and String to Check" input field. 
+                    <br>
+                    2. Generate NFA Table 
+                    <br>
+                    - Input the variables, states, start state, and final states in the corresponding input fields. 
+                    <br>
+                    - Click the ‘Generate Transition Table’ button to generate an HTML table representing the NFA. 
+                    <br>
+                    3. Convert NFA to Regular Grammar
+                    <br>
+                    - Update the corresponding input field with the transition data.  
+                    <br>
+                    - Click the ‘Convert NFA to RG’ button to convert the NFA to Regular Grammar.
+                    <br>
+                    4. Input the strings you want to check into the "String to Check" input field (left column). 
+                    <br>
+                    - Click the ‘Check String’ button to check the strings against the NFA. 
+                    <br>
+                    - The results will be displayed in the right column(Yes = accepted, No = rejected). 
+                    <br>
+                    5. Draw NFA Diagram  
+                    <br>
+                    - Click the ‘Draw NFA’ button to generate a canvas 2d diagram representing the NFA.
                 </p>
             </td>
         </table>
