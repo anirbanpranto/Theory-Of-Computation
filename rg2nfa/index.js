@@ -4,24 +4,19 @@ const dfaTransitionTable = new Map();
 const FINAL_STATE_STRING = "FINAL";
 const STARTING_STATE_CHAR = 'A';
 const NULL_STATE_KEY = 99999999999;
+const ARROW_SYMBOL = "→"
 
+// Variables to convert from NFA to DFA.
 const nfaWithoutEpsilon = new Map();
 const tempNfa = new Map();
 const variableSetWithoutEpsilon = new Set();
 
-// To make sure all states in word is defined in the grammar.
-const userDefinedState = new Set();
-const wordDefinedState = new Set();
-
 // Mapping of DFA state name mapping. Used when converting NFA to DFA.
 const dfaStateNameMapping = new Map();
 
-/**
-A - aR
-R - bR | aS
-S - bT
-T - R | ε 
- * **/
+// To make sure all states in word is defined in the grammar.
+const userDefinedState = new Set();
+const wordDefinedState = new Set();
 
 function drawHeader(tableName, row_data){
     let table = document.getElementById(tableName); 
@@ -49,50 +44,45 @@ function drawRow(tableName, row_data, num_row, row_name){
     cell_name.innerHTML = row_name; 
 }
 
-function drawNFATable(){
-    let header_obj = document.getElementById("epnfaH");
-    header_obj.innerHTML = "Transition Table"
-    let table = document.getElementById("epnfa");
+// Generic function to draw a table
+function drawTable(header_id,title,table_id,transitionTable,){
+    let header_obj = document.getElementById(header_id);
+    header_obj.innerHTML = title
+    let table = document.getElementById(table_id);
     table.innerHTML = ""
-    let keys = Array.from(nfaTransitionTable.keys())
+    let keys = Array.from(transitionTable.keys())
     //keys = keys.reverse();
     let alphabets = []
     if (keys.length > 0) {
-        alphabets = Array.from(nfaTransitionTable.get(keys[0])["mapping"].keys()); 
+        alphabets = Array.from(transitionTable.get(keys[0])["mapping"].keys()); 
         alphabets = alphabets.sort();
     } 
     keys.forEach((key, idx) => {
-        console.log(key)
-        const mapping = nfaTransitionTable.get(key)["mapping"]
+        const state = transitionTable.get(key)
+        const mapping = state["mapping"]
         const sorted = [...mapping].sort().reverse();
         const sorted_mapping = new Map(sorted);
+        const rowName = state.isInitialState ? '>' + key
+            : state.isFinalState ? '*' + key
+            : key 
+
         //draw one row
-        drawRow("epnfa", sorted_mapping, idx, key)
+        drawRow(table_id, sorted_mapping, idx, rowName)
     })
-    drawHeader("epnfa", alphabets.reverse())
+    drawHeader(table_id, alphabets.reverse())
 }
 
+function drawNFATable(){
+    drawTable("epnfaH","NFA Transition Table","epnfa",nfaTransitionTable)
+}
+
+
 function drawNFAwithoutEpsilonTable(){
-    let header_obj = document.getElementById("nepnfaH");
-    header_obj.innerHTML = "Transition Table w/o ε"
-    let table = document.getElementById("nepnfa");
-    table.innerHTML = ""
-    let keys = Array.from(nfaWithoutEpsilon.keys());
-    
-    let alphabets = []
-    if (keys.length > 0) {
-        alphabets = Array.from(nfaWithoutEpsilon.get(keys[0])["mapping"].keys()); 
-        alphabets = alphabets.sort();
-    } 
-    keys.forEach((key, idx) => {
-        console.log(key)
-        const mapping = nfaWithoutEpsilon.get(key)["mapping"]
-        const sorted = [...mapping].sort().reverse();
-        const sorted_mapping = new Map(sorted);
-        //draw one row
-        drawRow("nepnfa", sorted_mapping, idx, key)
-    })
-    drawHeader("nepnfa", alphabets.reverse())
+    drawTable("nepnfaH","NFA w/o Epsilon","nepnfa",nfaWithoutEpsilon);
+}
+
+function drawDFATable() {
+    drawTable("dfaTableHeader","DFA","dfaTable",dfaTransitionTable);
 }
 
 function parseParagraph(paragraph) {
@@ -100,7 +90,7 @@ function parseParagraph(paragraph) {
     clearGlobalVariable();
 
     //Reset error text.
-    document.getElementById("0").innerHTML = null
+    document.getElementById("InputErrorText").innerHTML = null
 
     var sentences = paragraph.trim().split("\n");
 
@@ -108,8 +98,6 @@ function parseParagraph(paragraph) {
         sentences.forEach(sentence => {
             parseSentence(sentence.trim())
         });
- 
-        drawNFATable();
 
         const firstStateName = Array.from(userDefinedState.values())[0]
         if(!wordDefinedState.has(firstStateName)){
@@ -122,13 +110,14 @@ function parseParagraph(paragraph) {
         getFirstState().isInitialState = true;
 
         convertToDfa();
-        
         drawNFAwithoutEpsilonTable();
+        drawNFATable();
+        drawDFATable();
     } catch (error) {
-        document.getElementById("0").innerHTML = error
+        document.getElementById("InputErrorText").innerHTML = "Error: " + error
     }
 
-    // print();
+    print();
 }
 
 function convertToDfa() {
@@ -140,7 +129,7 @@ function convertToDfa() {
 }
 
 function parseSentence(sentence) {
-    let arrowIndex = sentence.indexOf("->");
+    let arrowIndex = sentence.indexOf("→");
 
     // Arrow character is not found.
     if (arrowIndex == -1)
@@ -153,7 +142,6 @@ function parseSentence(sentence) {
     if (!isAlphaNumeric(stateNameString))
         throw "Invalid state name for \"" + stateNameString + "\"!"
     userDefinedState.add(stateNameString);
-    arrowIndex = arrowIndex + 1;
 
     let transitionSentence = sentence.substring(arrowIndex + 1, sentence.length)
     const stateTransitionWords = transitionSentence.split("|");
@@ -270,16 +258,16 @@ function isNFA() {
 }
 
 function drawChecks(results){
-    const checkStrings = document.getElementById("check_status");
+    const checkStrings = document.getElementById("checkStringResult");
     let checks = "";
-    results.forEach(item => {
-        if(item) {
-            checks += '<span style="color: green;">OK<span><br>'
+    results.forEach(accept => {
+        if(accept) {
+            checks += "Accepted\n"
         }
         else{
-            checks += '<span style="color: red;">NO\n<span><br>'
+            checks += "Rejected\n"
         }
-    })
+    })  
     checkStrings.innerHTML = checks; 
 }
 
@@ -307,7 +295,7 @@ function checkStrings(strings){
         checkResults.push(checkStringDfa(string))
     })
     drawChecks(checkResults)
-    console.log("Results",checkResults);
+    // console.log("Results",checkResults);
 }
 
 // Function to check given input is accepted by the machine or not.
@@ -658,4 +646,20 @@ function clearGlobalVariable() {
     dfaStateNameMapping.clear();
     userDefinedState.clear();
     wordDefinedState.clear();
+}
+
+//-------------Insert Epsilon & Arrow--------------
+function insertArrow() {
+    var text = document.getElementById('inputString');
+    text.value += ARROW_SYMBOL; 
+}
+
+function insertEpsilonAtRg() {
+    var text = document.getElementById('inputString');
+    text.value += '\u03B5';
+}
+
+function insertEpsilonAtCheckString() {
+    var text = document.getElementById('checkStringInput');
+    text.value += '\u03B5';
 }
