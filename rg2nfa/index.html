@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="index.css">
     <title>Regular Grammer to NFA</title>
 </head>
+
 <body>
     <h1>RG To NFA</h1>
-    <p><strong>Regular Grammar Input</strong></p> 
-    <table style="border: none;"> 
+    <p><strong>Regular Grammar Input</strong></p>
+    <table style="border: none;">
         <td style="border: none;padding: 0;">
             <textarea id="inputString" name="Input" rows="13" cols="55" spellcheck="false"></textarea>
         </td>
@@ -26,7 +28,7 @@
                 <br>
                 5. First sentence will be an initial state (entry point)
                 <br>
-                6. Sentence arrow is denoted by an arrow ("→") ex. S -> aS (❌),  S → aS (✔️)
+                6. Sentence arrow is denoted by an arrow ("→") ex. S -> aS (❌), S → aS (✔️)
                 <br>
                 7. Multiple transition word is denoted by a pipe ("|") ex. aS | bA | abB
                 <br>
@@ -34,25 +36,26 @@
                 <br>
                 9. Word parsing will stop when encountered an uppercase letter (State), subsequent
                 <br>
-                &nbsp;&nbsp;&nbsp; letter after an uppercase letter will be ignored. ex. aSaaa (will be read as aS ), Ca (will be parse as C)
-               </p>
-               <p> <b>How To Use</b>
+                &nbsp;&nbsp;&nbsp; letter after an uppercase letter will be ignored. ex. aSaaa (will be read as aS ), Ca
+                (will be parse as C)
+            </p>
+            <p> <b>How To Use</b>
                 <br>
                 1. Input grammar sentences separated by line break (Enter or "\n")
                 <br>
                 2. Click parse and transition table will be shown at the bottom.
-               </p>
+            </p>
         </td>
-        
-    </table> 
+
+    </table>
     <div style="margin-top: 10px; margin-bottom: 10px;font-weight: bold; color:red;" id="InputErrorText"></div>
     <button onclick="insertArrow()">Insert Arrow (→)</button>
     <button onclick="insertEpsilonAtRg()">Insert &epsilon;</button>
     <button onclick="parseParagraph(document.getElementById('inputString').value)">Parse</button>
-    
-    <p ></p>
-    <p><strong>Check Strings Input</strong></p> 
-    <table style="border: none;"> 
+
+    <p></p>
+    <p><strong>Check Strings Input</strong></p>
+    <table style="border: none;">
         <td style="border: none;padding: 0;">
             <textarea id="checkStringInput" name="strInput" rows="10" cols="30" spellcheck="false"></textarea>
             <textarea id="checkStringResult" disabled="true" rows="10" cols="15" spellcheck="false"></textarea>
@@ -63,36 +66,88 @@
                 1. Input multiple strings separated by line break (Enter or "\n")
                 <br>
                 2. Click Check and the result will be shown on the right.
-               </p>
+            </p>
         </td>
-    </table> 
+    </table>
     <button onclick="insertEpsilonAtCheckString()">Insert &epsilon;</button>
     <button onclick="checkStrings(document.getElementById('checkStringInput').value)">Check Strings</button>
 
-    <p ></p>
-    <p><strong>Transition Tables</strong></p> 
+    <p></p>
+    <p><strong>Finite Automaton & Transition Tables</strong></p>
     <table style="border:none;">
+        <td style="border: none;">
+            <table>
+                <tr>
+                    <td>
+                        <h4>M</h4>
+                    </td>
+                    <td>
+                        <h4>(Q,Σ,δ,q<sub>0</sub>,F)</h4>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div>Q</div>
+                    </td>
+                    <td>
+                        <div id="startingStateNames"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div>Σ</div>
+                    </td>
+                    <td>
+                        <div id="tableTransitionVariables"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div>δ</div>
+                    </td>
+                    <td>
+                        <div>Q x Σε → Pow(Q)</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div>q<sub>0</sub></div>
+                    </td>
+                    <td>
+                        <div id="startingStateName"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div>F</div>
+                    </td>
+                    <td>
+                        <div id="finalStateNames"></div>
+                    </td>
+                </tr>
+            </table>
+        </td>
         <td style="border: none;">
             <h2 id="epnfaH"></h2>
             <table id="epnfa">
-                
+
             </table>
         </td>
         <td style="border: none;">
             <h2 id="nepnfaH"></h2>
             <table id="nepnfa">
-    
+
             </table>
         </td>
         <td style="border: none;">
             <h2 id="dfaTableHeader"></h2>
             <table id="dfaTable">
-    
+
             </table>
         </td>
-       </table>
-   <p id="1"></p>
-   
+    </table>
+    <p id="1"></p>
+
 </body>
 <script src="index.js"></script>
 
@@ -107,4 +162,5 @@
 <!-- <script>parseParagraph("S → bS | aA \n A →  bA | aB \n B → aB | bB | c")</script> -->
 <!-- <script>parseParagraph("S -> 1A | 1S | 0S \n A->ε")</script> -->
 <!-- <script>parseParagraph("S -> aS | bA | bS \n A -> aS | bB \n B -> ε")</script> -->
+
 </html>
