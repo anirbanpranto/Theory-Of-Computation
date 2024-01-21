@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="index.css">
+    <title>Help + Doc</title>
+</head>
+<body>
+    <div style="text-align: left;" class="main-wrapper">
+        <div class="tab-container">
+            <a href="index.html"><button>Home</button></a>
+            <a href="nfa2rg/index.html"><button>NFA2RG</button></a>
+            <a href="rg2nfa/index.html"><button>RG2NFA</button></a>
+            <a href="help.html"><button class="active">Help + Doc</button></a>
+        </div><!-- end tabs container -->
+        <h1 style="text-align: center;">Help + Doc</h1>
+        <table style="border: none;">
+            <td style="border: none; margin-left: 20px; padding-top: 0; padding-bottom: 0;">
+                <p> <b>Instructions</b>
+                    <br>
+                    1. Input regular grammar (example: S → aS | ε )
+                    <br>
+                    2. Each sentence is separated by line break (Enter or "\n")
+                    <br>
+                    3. State must be one uppercase alphabet [A-Z]
+                    <br>
+                    4. Transition variable must be number [0-9] or lowercase alphabet [a-z]
+                    <br>
+                    5. First sentence will be an initial state (entry point)
+                    <br>
+                    6. Sentence arrow is denoted by an arrow ("→") ex. S -> aS (❌), S → aS (✔️)
+                    <br>
+                    7. Multiple transition word is denoted by a pipe ("|") ex. aS | bA | abB
+                    <br>
+                    8. No space for each transition word ex. S → a S (❌), S → aS (✔️)
+                    <br>
+                    9. Word parsing will stop when encountered an uppercase letter (State), subsequent
+                    <br>
+                    &nbsp;&nbsp;&nbsp; letter after an uppercase letter will be ignored. ex. aSaaa (will be read as aS ), Ca
+                    (will be parse as C)
+                </p>
+            </td>
+        </table>
+    </div>
+</body>
+<script src="index.js"></script>
+</html>
