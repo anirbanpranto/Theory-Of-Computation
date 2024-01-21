@@ -289,7 +289,7 @@ function print() {
 }
 
 function checkStrings(strings){
-    listOfStrings = strings.trim().split("\n");
+    listOfStrings = strings.split("\n");
     const checkResults = []
     listOfStrings.forEach(string =>{
         checkResults.push(checkStringDfa(string))
